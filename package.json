@@ -1,0 +1,32 @@
+{
+  "name": "compar-framework",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "npm@10.2.4",
+  "workspaces": [
+    "tests/*"
+  ],
+  "scripts": {
+    "env:up": "node scripts/compose.js app up -d",
+    "env:down": "node scripts/compose.js app down --remove-orphans",
+    "env:reset": "node scripts/compose.js app down -v --remove-orphans",
+    "env:wait": "node scripts/wait-for-app.js",
+    "test:selenium": "node scripts/compose.js all run --rm selenium-tests",
+    "test:cypress": "node scripts/compose.js all run --rm cypress-tests",
+    "test:playwright": "node scripts/compose.js all run --rm playwright-tests",
+    "test:all": "node scripts/run-all.js",
+    "compose:app:up": "node scripts/compose.js app up -d",
+    "compose:app:down": "node scripts/compose.js app down --remove-orphans",
+    "compose:tests:up": "node scripts/compose.js all up -d selenium-chrome",
+    "compose:tests:down": "node scripts/compose.js all down --remove-orphans",
+    "compose:status": "node scripts/compose.js all ps",
+    "lint": "eslint . --ext .js --max-warnings=0"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "devDependencies": {
+    "dotenv": "^17.3.1",
+    "eslint": "^10.0.2"
+  }
+}

@@ -1,0 +1,42 @@
+services:
+  wordpress:
+    image: test-bookstore-wordpress:local
+    build:
+      context: apps/test-bookstore/wordpress-image
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8080}:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_HOME', 'http://' . $$_SERVER['HTTP_HOST']);
+        define('WP_SITEURL', 'http://' . $$_SERVER['HTTP_HOST']);
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - wpsite
+
+  db:
+    image: test-bookstore-mysql:local
+    build:
+      context: apps/test-bookstore/mysql-image
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+      MYSQL_ROOT_PASSWORD: wordpress
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - wpsite
+
+networks:
+  wpsite: {}

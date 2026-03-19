@@ -1,0 +1,238 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      selenium: ${{ steps.filter.outputs.selenium }}
+      cypress: ${{ steps.filter.outputs.cypress }}
+      playwright: ${{ steps.filter.outputs.playwright }}
+      shared: ${{ steps.filter.outputs.shared }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.SUBMODULES_TOKEN || github.token }}
+
+      - name: Detect changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          list-files: shell
+          filters: |
+            selenium:
+              - 'tests/selenium/**'
+            cypress:
+              - 'tests/cypress/**'
+            playwright:
+              - 'tests/playwright/**'
+            shared:
+              - 'scripts/**'
+              - 'apps/bookstore/**'
+              - 'docker-compose.tests.yml'
+              - 'package.json'
+              - 'package-lock.json'
+
+  lint:
+    runs-on: ubuntu-latest
+    needs: [changes]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.SUBMODULES_TOKEN || github.token }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Validate docker compose
+        run: docker compose -f apps/bookstore/docker-compose.yml -f docker-compose.tests.yml config > /dev/null
+
+  tests-selenium:
+    runs-on: ubuntu-latest
+    needs: [lint, changes]
+    if: needs.changes.outputs.selenium == 'true' || needs.changes.outputs.shared == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.SUBMODULES_TOKEN || github.token }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Start app
+        run: node scripts/compose.js app up -d
+
+      - name: Wait for app
+        run: node scripts/wait-for-app.js
+
+      - name: Run Selenium tests
+        env:
+          TESTRAIL_ENABLED: ${{ secrets.TESTRAIL_ENABLED || 'false' }}
+          TESTRAIL_URL: ${{ secrets.TESTRAIL_URL }}
+          TESTRAIL_USER: ${{ secrets.TESTRAIL_USER }}
+          TESTRAIL_API_KEY: ${{ secrets.TESTRAIL_API_KEY }}
+          TESTRAIL_PROJECT_ID: ${{ secrets.TESTRAIL_PROJECT_ID }}
+          TESTRAIL_RUN_ID: ${{ secrets.TESTRAIL_RUN_ID }}
+        run: node scripts/compose.js all run --rm selenium-tests
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-selenium
+          path: reports
+          if-no-files-found: warn
+
+      - name: Teardown
+        if: always()
+        run: node scripts/compose.js all down --remove-orphans || true
+
+  tests-cypress:
+    runs-on: ubuntu-latest
+    needs: [lint, changes]
+    if: needs.changes.outputs.cypress == 'true' || needs.changes.outputs.shared == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.SUBMODULES_TOKEN || github.token }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Start app
+        run: node scripts/compose.js app up -d
+
+      - name: Wait for app
+        run: node scripts/wait-for-app.js
+
+      - name: Run Cypress tests
+        env:
+          TESTRAIL_ENABLED: ${{ secrets.TESTRAIL_ENABLED || 'false' }}
+          TESTRAIL_URL: ${{ secrets.TESTRAIL_URL }}
+          TESTRAIL_USER: ${{ secrets.TESTRAIL_USER }}
+          TESTRAIL_API_KEY: ${{ secrets.TESTRAIL_API_KEY }}
+          TESTRAIL_PROJECT_ID: ${{ secrets.TESTRAIL_PROJECT_ID }}
+          TESTRAIL_RUN_ID: ${{ secrets.TESTRAIL_RUN_ID }}
+        run: node scripts/compose.js all run --rm cypress-tests
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-cypress
+          path: reports
+          if-no-files-found: warn
+
+      - name: Teardown
+        if: always()
+        run: node scripts/compose.js all down --remove-orphans || true
+
+  tests-playwright:
+    runs-on: ubuntu-latest
+    needs: [lint, changes]
+    if: needs.changes.outputs.playwright == 'true' || needs.changes.outputs.shared == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.SUBMODULES_TOKEN || github.token }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Start app
+        run: node scripts/compose.js app up -d
+
+      - name: Wait for app
+        run: node scripts/wait-for-app.js
+
+      - name: Run Playwright tests
+        env:
+          TESTRAIL_ENABLED: ${{ secrets.TESTRAIL_ENABLED || 'false' }}
+          TESTRAIL_URL: ${{ secrets.TESTRAIL_URL }}
+          TESTRAIL_USER: ${{ secrets.TESTRAIL_USER }}
+          TESTRAIL_API_KEY: ${{ secrets.TESTRAIL_API_KEY }}
+          TESTRAIL_PROJECT_ID: ${{ secrets.TESTRAIL_PROJECT_ID }}
+          TESTRAIL_RUN_ID: ${{ secrets.TESTRAIL_RUN_ID }}
+        run: node scripts/compose.js all run --rm playwright-tests
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-playwright
+          path: reports
+          if-no-files-found: warn
+
+      - name: Teardown
+        if: always()
+        run: node scripts/compose.js all down --remove-orphans || true
+
+  ci-summary:
+    runs-on: ubuntu-latest
+    needs: [lint, tests-selenium, tests-cypress, tests-playwright]
+    if: always()
+    steps:
+      - name: Evaluate
+        env:
+          LINT_RESULT: ${{ needs.lint.result }}
+          SELENIUM_RESULT: ${{ needs.tests-selenium.result }}
+          CYPRESS_RESULT: ${{ needs.tests-cypress.result }}
+          PLAYWRIGHT_RESULT: ${{ needs.tests-playwright.result }}
+        run: |
+          set -euo pipefail
+          fail=0
+          if [[ "$LINT_RESULT" != "success" ]]; then
+            echo "lint failed"
+            fail=1
+          fi
+          for result in "$SELENIUM_RESULT" "$CYPRESS_RESULT" "$PLAYWRIGHT_RESULT"; do
+            if [[ "$result" != "success" && "$result" != "skipped" ]]; then
+              echo "tests failed"
+              fail=1
+            fi
+          done
+          exit $fail

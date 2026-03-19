@@ -1,0 +1,80 @@
+x-test-env: &test_env
+  BASE_URL: http://wordpress
+  TESTRAIL_ENABLED: ${TESTRAIL_ENABLED:-false}
+  TESTRAIL_URL: ${TESTRAIL_URL:-}
+  TESTRAIL_USER: ${TESTRAIL_USER:-}
+  TESTRAIL_API_KEY: ${TESTRAIL_API_KEY:-}
+  TESTRAIL_PROJECT_ID: ${TESTRAIL_PROJECT_ID:-}
+  TESTRAIL_RUN_ID: ${TESTRAIL_RUN_ID:-}
+  TEST_USER_PASSWORD: ${TEST_USER_PASSWORD:-TestPass123!}
+  TEST_USER_FIRSTNAME: ${TEST_USER_FIRSTNAME:-Jan}
+  TEST_USER_LASTNAME: ${TEST_USER_LASTNAME:-Kowalski}
+  TEST_USER_ADDRESS: ${TEST_USER_ADDRESS:-Testowa 1}
+  TEST_USER_CITY: ${TEST_USER_CITY:-Warszawa}
+  TEST_USER_POSTCODE: ${TEST_USER_POSTCODE:-00-001}
+  TEST_USER_PHONE: ${TEST_USER_PHONE:-500600700}
+  STRIPE_CARD_NUMBER: ${STRIPE_CARD_NUMBER:-4242424242424242}
+  STRIPE_CARD_EXP: ${STRIPE_CARD_EXP:-12/30}
+  STRIPE_CARD_CVC: ${STRIPE_CARD_CVC:-123}
+  STRIPE_CARD_ZIP: ${STRIPE_CARD_ZIP:-12345}
+
+services:
+  selenium-chrome:
+    image: selenium/standalone-chrome:4.16.1
+    shm_size: "2gb"
+    ports:
+      - "4444:4444"
+    networks:
+      - wpsite
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4444/wd/hub/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 12
+      start_period: 30s
+
+  selenium-tests:
+    image: compar-selenium-tests:latest
+    build:
+      context: .
+      dockerfile: tests/selenium/Dockerfile
+    depends_on:
+      selenium-chrome:
+        condition: service_healthy
+    environment:
+      <<: *test_env
+      SELENIUM_REMOTE_URL: http://selenium-chrome:4444/wd/hub
+    volumes:
+      - ./reports:/work/reports
+    networks:
+      - wpsite
+    command: ["npm", "run", "test"]
+
+  cypress-tests:
+    image: compar-cypress-tests:latest
+    build:
+      context: .
+      dockerfile: tests/cypress/Dockerfile
+    environment:
+      <<: *test_env
+    volumes:
+      - ./reports:/work/reports
+    networks:
+      - wpsite
+    command: ["npm", "run", "test"]
+
+  playwright-tests:
+    image: compar-playwright-tests:latest
+    build:
+      context: .
+      dockerfile: tests/playwright/Dockerfile
+    environment:
+      <<: *test_env
+    volumes:
+      - ./reports:/work/reports
+    networks:
+      - wpsite
+    command: ["npm", "run", "test"]
+
+networks:
+  wpsite: {}

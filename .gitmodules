@@ -1,0 +1,3 @@
+[submodule "apps/test-bookstore"]
+	path = apps/test-bookstore
+	url = https://github.com/przemyslaw-tarko/test-bookstore.git

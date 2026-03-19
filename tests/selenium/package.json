@@ -1,0 +1,15 @@
+{
+  "name": "compar-selenium",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "test": "node scripts/wait-for-url.js && mocha --timeout 60000 --reporter mocha-multi-reporters --reporter-options configFile=./mocha-reporters.json \"specs/**/*.test.js\""
+  },
+  "dependencies": {
+    "mocha": "^11.7.5",
+    "mocha-junit-reporter": "^2.2.1",
+    "mocha-multi-reporters": "^1.5.1",
+    "mochawesome": "^7.1.4",
+    "selenium-webdriver": "^4.41.0"
+  }
+}

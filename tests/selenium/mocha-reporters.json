@@ -1,0 +1,13 @@
+{
+  "reporterEnabled": "mochawesome, mocha-junit-reporter",
+  "mochawesomeReporterOptions": {
+    "reportDir": "../../reports/selenium/html",
+    "quiet": true,
+    "overwrite": false,
+    "html": true,
+    "json": false
+  },
+  "mochaJunitReporterReporterOptions": {
+    "mochaFile": "../../reports/selenium/junit/results.xml"
+  }
+}
