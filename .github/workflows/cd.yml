@@ -14,13 +14,13 @@ jobs:
       matrix:
         include:
           - name: selenium
-            image: ghcr.io/${{ github.repository_owner }}/compar-selenium-tests
+            image: ghcr.io/${{ github.repository_owner }}/projekt-inzynierski-testy-selenium-tests
             dockerfile: tests/selenium/Dockerfile
           - name: cypress
-            image: ghcr.io/${{ github.repository_owner }}/compar-cypress-tests
+            image: ghcr.io/${{ github.repository_owner }}/projekt-inzynierski-testy-cypress-tests
             dockerfile: tests/cypress/Dockerfile
           - name: playwright
-            image: ghcr.io/${{ github.repository_owner }}/compar-playwright-tests
+            image: ghcr.io/${{ github.repository_owner }}/projekt-inzynierski-testy-playwright-tests
             dockerfile: tests/playwright/Dockerfile
     steps:
       - name: Checkout

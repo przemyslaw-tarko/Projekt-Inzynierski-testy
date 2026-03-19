@@ -106,5 +106,6 @@ VERBOSE_LOGS=true
 1. `auto-pr.yml` - tworzy PR dla kazdego branch oprocz `main`.
 2. `ci.yml` - lint + testy tylko tych frameworkow, ktorych kod sie zmienil (tylko na PR).
 3. `auto-merge.yml` - wlacza auto-merge po poprawnym CI.
+4. `cd.yml` - publikuje obrazy testow do GHCR po merge do `main`.
 
 CD (publikowanie obrazow) mozemy dolozyc pozniej, gdy potwierdzimy stabilne dzialanie CI.
