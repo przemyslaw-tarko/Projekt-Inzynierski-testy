@@ -23,12 +23,24 @@ jobs:
         run: |
           set -euo pipefail
           if gh pr view "$BRANCH" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            echo "PR already exists for $BRANCH"
+            echo "PR already exists for branch $BRANCH"
             exit 0
           fi
-          gh pr create \
+          set +e
+          output=$(gh pr create \
             --repo "$GITHUB_REPOSITORY" \
             --base main \
             --head "$BRANCH" \
             --title "Auto PR: $BRANCH" \
-            --body "Automated PR created from push."
+            --body "Automated PR created from push." 2>&1)
+          status=$?
+          set -e
+          if [[ $status -ne 0 ]]; then
+            if echo "$output" | grep -qi "already exists"; then
+              echo "$output"
+              exit 0
+            fi
+            echo "$output"
+            exit "$status"
+          fi
+          echo "$output"
