@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 const http = require('node:http');
 const https = require('node:https');
+const { getBaseUrl } = require('../utils/baseUrl');
 
 const baseUrl = process.env.BASE_URL || 'http://wordpress';
 const verbose = process.env.VERBOSE_LOGS === 'true';

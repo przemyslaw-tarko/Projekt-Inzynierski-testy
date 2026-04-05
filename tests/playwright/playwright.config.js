@@ -1,10 +1,11 @@
 const { defineConfig } = require('@playwright/test');
+const { getBaseUrl } = require('./utils/baseUrl');
 
 module.exports = defineConfig({
   testDir: './tests',
   timeout: 60000,
   use: {
-    baseURL: process.env.BASE_URL || 'http://wordpress',
+    baseURL: getBaseUrl(),
     headless: true
   },
   reporter: [

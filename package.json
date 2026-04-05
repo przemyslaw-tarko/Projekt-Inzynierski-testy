@@ -17,6 +17,7 @@
     "test:all": "node scripts/run-all.js",
     "compose:app:up": "node scripts/compose.js app up -d",
     "compose:app:down": "node scripts/compose.js app down --remove-orphans",
+    "compose:tests:build": "docker builder prune -f && node scripts/compose.js all build selenium-tests cypress-tests playwright-tests",
     "compose:tests:up": "node scripts/compose.js all up -d selenium-chrome",
     "compose:tests:down": "node scripts/compose.js all down --remove-orphans",
     "compose:status": "node scripts/compose.js all ps",
