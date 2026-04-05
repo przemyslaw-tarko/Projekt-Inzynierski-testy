@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 const dotenv = require('dotenv');
+const fs = require('fs');
 const path = require('node:path');
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
-const baseUrl = process.env.BASE_URL || 'http://localhost:8080';
+const isDocker = fs.existsSync('/.dockerenv') || process.env.DOCKER === 'true';
+const defaultBaseUrl = isDocker ? 'http://wordpress' : 'http://localhost:8080';
+const baseUrl = process.env.BASE_URL || defaultBaseUrl;
 const verbose = process.env.VERBOSE_LOGS === 'true';
 const timeoutMs = 180000;
 const intervalMs = 3000;
