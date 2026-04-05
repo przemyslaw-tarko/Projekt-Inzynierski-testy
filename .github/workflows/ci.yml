@@ -93,7 +93,7 @@ jobs:
         run: node scripts/compose.js app up -d
 
       - name: Wait for app
-        run: node scripts/wait-for-app.js
+        run: DOCKER=true node scripts/wait-for-app.js
 
       - name: Run Selenium tests
         env:
@@ -140,7 +140,7 @@ jobs:
         run: node scripts/compose.js app up -d
 
       - name: Wait for app
-        run: node scripts/wait-for-app.js
+        run: DOCKER=true node scripts/wait-for-app.js
 
       - name: Run Cypress tests
         env:
@@ -187,7 +187,7 @@ jobs:
         run: node scripts/compose.js app up -d
 
       - name: Wait for app
-        run: node scripts/wait-for-app.js
+        run: DOCKER=true node scripts/wait-for-app.js
 
       - name: Run Playwright tests
         env:
