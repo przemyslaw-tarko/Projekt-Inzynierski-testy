@@ -67,9 +67,9 @@ npm run test:cypress
 npm run test:playwright
 ```
 
-Jesli wprowadzisz zmiany w testach uruchamianych w kontenerach (Selenium/Cypress/Playwright), przebuduj obrazy testowe:
+Jesli wprowadzisz zmiany w testach uruchamianych w kontenerach (Selenium/Cypress/Playwright), obrazy testowe przebuduja sie automatycznie przy uruchomieniu testow. Mozesz tez uruchomic caly zestaw jednym poleceniem:
 ```bash
-npm run compose:tests:build
+npm run test:all
 ```
 
 ## Scenariusze testowe
