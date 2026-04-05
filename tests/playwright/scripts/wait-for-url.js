@@ -4,7 +4,7 @@ const https = require('node:https');
 
 const baseUrl = process.env.BASE_URL || 'http://wordpress';
 const verbose = process.env.VERBOSE_LOGS === 'true';
-const timeoutMs = 120000;
+const timeoutMs = Number(process.env.WAIT_FOR_URL_TIMEOUT_MS) || 300000;
 const intervalMs = 3000;
 
 function requestOnce(url) {
