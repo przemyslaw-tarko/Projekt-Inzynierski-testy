@@ -67,11 +67,6 @@ npm run test:cypress
 npm run test:playwright
 ```
 
-Jesli wprowadzisz zmiany w testach uruchamianych w kontenerach (Selenium/Cypress/Playwright), przebuduj obrazy testowe:
-```bash
-npm run compose:tests:build
-```
-
 ## Scenariusze testowe
 Dla kazdego frameworka zostal przygotowany identyczny zestaw testow.
 Scenariusze dostepne w pliku `test-scenario`.
