@@ -190,8 +190,34 @@ jobs:
       - name: Wait for app
         run: node scripts/wait-for-app.js
 
+      - name: Docker ps
+        run: docker ps -a
+
+      - name: Docker compose status
+        run: node scripts/compose.js all ps
+
+      - name: WordPress logs
+        if: always()
+        run: docker logs $(docker ps -q --filter "name=wordpress") || true
+
+      - name: DB logs
+        if: always()
+        run: docker logs $(docker ps -q --filter "name=db") || true
+
+      - name: Network inspect
+        if: always()
+        run: docker network ls && docker network inspect $(docker network ls --format '{{.Name}}' | grep wpsite | head -n 1) || true
+
+      - name: Check app from test container
+        run: |
+          node scripts/compose.js all run --rm playwright-tests sh -lc "
+            getent hosts wordpress || true
+            curl -I http://wordpress || true
+            node -e \"require('http').get('http://wordpress', r => { console.log(r.statusCode); process.exit(0); }).on('error', e => { console.error(e.message); process.exit(1); })\"
+          "
       - name: Run Playwright tests
         env:
+          VERBOSE_LOGS: 'true'
           TESTRAIL_ENABLED: ${{ secrets.TESTRAIL_ENABLED || 'false' }}
           TESTRAIL_URL: ${{ secrets.TESTRAIL_URL }}
           TESTRAIL_USER: ${{ secrets.TESTRAIL_USER }}

@@ -19,6 +19,14 @@ x-test-env: &test_env
   STRIPE_CARD_ZIP: ${STRIPE_CARD_ZIP:-12345}
 
 services:
+  wordpress:
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
   selenium-chrome:
     image: selenium/standalone-chrome:4.16.1
     shm_size: "2gb"
@@ -41,6 +49,8 @@ services:
     depends_on:
       selenium-chrome:
         condition: service_healthy
+      wordpress:
+        condition: service_healthy
     environment:
       <<: *test_env
       SELENIUM_REMOTE_URL: http://selenium-chrome:4444/wd/hub
@@ -55,6 +65,9 @@ services:
     build:
       context: .
       dockerfile: tests/cypress/Dockerfile
+    depends_on:
+      wordpress:
+        condition: service_healthy
     environment:
       <<: *test_env
     volumes:
@@ -68,6 +81,9 @@ services:
     build:
       context: .
       dockerfile: tests/playwright/Dockerfile
+    depends_on:
+      wordpress:
+        condition: service_healthy
     environment:
       <<: *test_env
     volumes:
