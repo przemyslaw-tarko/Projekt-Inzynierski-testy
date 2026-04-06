@@ -18,6 +18,7 @@ Projekt realizowany w ramach pracy inzynierskiej - srodowisko badawcze do porown
 ```
 apps/bookstore/         # docker-compose dla AUT (obrazy Docker)
 apps/test-bookstore/    # submodule: zrodlo aplikacji testowej (AUT)
+docs/test-case.md       # scenariusze testowe
 tests/selenium/
 tests/cypress/
 tests/playwright/
@@ -74,7 +75,7 @@ npm run compose:tests:build
 
 ## Scenariusze testowe
 Dla kazdego frameworka zostal przygotowany identyczny zestaw testow.
-Scenariusze dostepne w pliku `test-scenario`.
+Scenariusze dostepne w pliku `docs/test-case.md`.
 
 ## Raporty
 - `reports/selenium/html`
@@ -84,16 +85,6 @@ Scenariusze dostepne w pliku `test-scenario`.
 - `reports/playwright/html`
 - `reports/playwright/junit`
 
-## Uruchamianie lokalnie w VS Code (Playwright)
-Playwright uruchamiany z rozszerzenia VS Code dziala lokalnie (poza Dockerem),
-wiec ustaw `BASE_URL` na `http://localhost:8080` w `.vscode/settings.json`:
-```json
-{
-  "playwright.env": {
-    "BASE_URL": "http://localhost:8080"
-  }
-}
-```
 
 ## Logi
 Domyslnie logi z oczekiwania na aplikacje i z Docker Compose sa wyciszone.
@@ -107,4 +98,4 @@ VERBOSE_LOGS=true
 2. `ci.yml` - lint + testy tylko tych frameworkow, ktorych kod sie zmienil (tylko na PR).
 3. `auto-merge.yml` - wlacza auto-merge po poprawnym CI.
 
-CD (publikowanie obrazow) mozemy dolozyc pozniej, gdy potwierdzimy stabilne dzialanie CI.
+CD publikuje obrazy testowe do GHCR dopiero po pomyslnym CI.
