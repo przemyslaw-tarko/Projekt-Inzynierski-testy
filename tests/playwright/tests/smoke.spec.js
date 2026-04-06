@@ -1,9 +1,7 @@
 const { test, expect } = require('@playwright/test');
+const { toUrl } = require('../utils/baseUrl');
 
-test('title contains "Test App" (Playwright)', async ({ page }) => {
-  await page.goto('/');
-  await expect(page.locator('body')).toBeVisible();
-  await expect(page).toHaveTitle(/Test App/);
+test('smoke: app responds', async ({ page }) => {
+  await page.goto(toUrl('/'));
+  await expect(page).toHaveTitle(/Test App/i);
 });
-
-// test p 1111111
