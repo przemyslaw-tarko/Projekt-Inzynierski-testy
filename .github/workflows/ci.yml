@@ -104,7 +104,7 @@ jobs:
           TESTRAIL_API_KEY: ${{ secrets.TESTRAIL_API_KEY }}
           TESTRAIL_PROJECT_ID: ${{ secrets.TESTRAIL_PROJECT_ID }}
           TESTRAIL_RUN_ID: ${{ secrets.TESTRAIL_RUN_ID }}
-        run: node scripts/compose.js all run --rm selenium-tests
+        run: node scripts/compose.js all run --rm --no-deps selenium-tests
 
       - name: Upload reports
         if: always()
@@ -151,7 +151,7 @@ jobs:
           TESTRAIL_API_KEY: ${{ secrets.TESTRAIL_API_KEY }}
           TESTRAIL_PROJECT_ID: ${{ secrets.TESTRAIL_PROJECT_ID }}
           TESTRAIL_RUN_ID: ${{ secrets.TESTRAIL_RUN_ID }}
-        run: node scripts/compose.js all run --rm cypress-tests
+        run: node scripts/compose.js all run --rm --no-deps cypress-tests
 
       - name: Upload reports
         if: always()
@@ -210,7 +210,7 @@ jobs:
 
       - name: Check app from test container
         run: |
-          node scripts/compose.js all run --rm playwright-tests sh -lc "
+          node scripts/compose.js all run --rm --no-deps playwright-tests sh -lc "
             getent hosts wordpress || true
             curl -I http://wordpress || true
             node -e \"require('http').get('http://wordpress', r => { console.log(r.statusCode); process.exit(0); }).on('error', e => { console.error(e.message); process.exit(1); })\"
@@ -224,7 +224,7 @@ jobs:
           TESTRAIL_API_KEY: ${{ secrets.TESTRAIL_API_KEY }}
           TESTRAIL_PROJECT_ID: ${{ secrets.TESTRAIL_PROJECT_ID }}
           TESTRAIL_RUN_ID: ${{ secrets.TESTRAIL_RUN_ID }}
-        run: node scripts/compose.js all run --rm playwright-tests
+        run: node scripts/compose.js all run --rm --no-deps playwright-tests
 
       - name: Upload reports
         if: always()
