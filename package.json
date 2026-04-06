@@ -18,6 +18,7 @@
     "compose:app:up": "node scripts/compose.js app up -d",
     "compose:app:down": "node scripts/compose.js app down --remove-orphans",
     "compose:tests:up": "node scripts/compose.js all up -d selenium-chrome",
+    "compose:tests:build": "node scripts/compose.js all build",
     "compose:tests:down": "node scripts/compose.js all down --remove-orphans",
     "compose:status": "node scripts/compose.js all ps",
     "lint": "eslint . --ext .js --max-warnings=0"

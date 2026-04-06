@@ -39,6 +39,8 @@ services:
       context: .
       dockerfile: tests/selenium/Dockerfile
     depends_on:
+      wordpress:
+        condition: service_healthy
       selenium-chrome:
         condition: service_healthy
     environment:
@@ -57,6 +59,9 @@ services:
       dockerfile: tests/cypress/Dockerfile
     environment:
       <<: *test_env
+    depends_on:
+      wordpress:
+        condition: service_healthy
     volumes:
       - ./reports:/work/reports
     networks:
@@ -70,6 +75,9 @@ services:
       dockerfile: tests/playwright/Dockerfile
     environment:
       <<: *test_env
+    depends_on:
+      wordpress:
+        condition: service_healthy
     volumes:
       - ./reports:/work/reports
     networks:

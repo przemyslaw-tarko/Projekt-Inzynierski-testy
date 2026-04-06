@@ -3,6 +3,8 @@ name: CI
 on:
   pull_request:
     branches: [main]
+  push:
+    branches: [main]
 
 permissions:
   contents: read
@@ -41,9 +43,12 @@ jobs:
             shared:
               - 'scripts/**'
               - 'apps/bookstore/**'
+              - 'apps/test-bookstore'
+              - 'apps/test-bookstore/**'
               - 'docker-compose.tests.yml'
               - 'package.json'
               - 'package-lock.json'
+              - '.gitmodules'
 
   lint:
     runs-on: ubuntu-latest

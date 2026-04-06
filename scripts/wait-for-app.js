@@ -4,17 +4,20 @@ const path = require('node:path');
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
-const baseUrl = process.env.BASE_URL || 'http://localhost:8080';
+const appPort = process.env.APP_PORT || '8080';
+const baseUrl = process.env.BASE_URL || `http://localhost:${appPort}`;
 const verbose = process.env.VERBOSE_LOGS === 'true';
 const timeoutMs = 180000;
 const intervalMs = 3000;
+let lastStatus = null;
 
 const start = Date.now();
 
 async function check() {
   try {
     const res = await fetch(baseUrl, { method: 'GET' });
-    if (res.ok) return true;
+    lastStatus = res.status;
+    if (res.status >= 200 && res.status < 400) return true;
   } catch (err) {
     return false;
   }
@@ -32,6 +35,7 @@ async function check() {
     if (verbose) process.stdout.write('.');
     await new Promise((r) => setTimeout(r, intervalMs));
   }
-  process.stdout.write('\nTimeout waiting for app.\n');
+  const statusInfo = lastStatus ? ` (last status: ${lastStatus})` : '';
+  process.stdout.write(`\nTimeout waiting for app${statusInfo}.\n`);
   process.exit(1);
 })();
