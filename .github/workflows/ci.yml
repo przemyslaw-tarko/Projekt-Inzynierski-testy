@@ -187,8 +187,10 @@ jobs:
       - name: Start app stack
         run: node scripts/compose.js all up -d db wordpress
 
-      - name: Wait for app
-        run: node scripts/wait-for-app.js
+      - name: Wait for app from Playwright container
+        env:
+          VERBOSE_LOGS: 'true'
+        run: node scripts/compose.js all run --rm --no-deps playwright-tests node scripts/wait-for-url.js
 
       - name: Docker ps
         run: docker ps -a
@@ -208,13 +210,6 @@ jobs:
         if: always()
         run: docker network ls && docker network inspect $(docker network ls --format '{{.Name}}' | grep wpsite | head -n 1) || true
 
-      - name: Check app from test container
-        run: |
-          node scripts/compose.js all run --rm --no-deps playwright-tests sh -lc "
-            getent hosts wordpress || true
-            curl -I http://wordpress || true
-            node -e \"require('http').get('http://wordpress', r => { console.log(r.statusCode); process.exit(0); }).on('error', e => { console.error(e.message); process.exit(1); })\"
-          "
       - name: Run Playwright tests
         env:
           VERBOSE_LOGS: 'true'
@@ -224,7 +219,7 @@ jobs:
           TESTRAIL_API_KEY: ${{ secrets.TESTRAIL_API_KEY }}
           TESTRAIL_PROJECT_ID: ${{ secrets.TESTRAIL_PROJECT_ID }}
           TESTRAIL_RUN_ID: ${{ secrets.TESTRAIL_RUN_ID }}
-        run: node scripts/compose.js all run --rm --no-deps playwright-tests
+        run: node scripts/compose.js all run --rm --no-deps playwright-tests playwright test
 
       - name: Upload reports
         if: always()
