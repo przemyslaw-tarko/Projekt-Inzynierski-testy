@@ -1,9 +1,22 @@
 # Przypadki Testowe (implemented)
 
 Ten plik opisuje zaimplementowane testy dla użycia i porównania frameworków.
+- Selenium
+- Cypress
+- Playwright
 
+## Implementacja
+UI:
+- `tests/playwright/tests/ui.spec.js`
+- `tests/cypress/e2e/ui.cy.js`
+- `tests/playwrighy/specs/ui.test.js`
+  
+API:
+- `tests/playwright/tests/api.spec.js`
+- `tests/cypress/e2e/api.cy.js`
+- `tests/playwrighy/specs/api.test.js`
+  
 ## UI – Główne Przepływy Użytkownika  
-1. `tests/playwright/tests/ui.spec.js`
 
 ### UI-01 Home page loads
 - **Preconditions:** Aplikacja działa.
@@ -91,7 +104,6 @@ Ten plik opisuje zaimplementowane testy dla użycia i porównania frameworków.
 - **Expected:** Widoczny jest nagłówek (banner) oraz główna treść strony.
 
 ## API – Store (Public) 
-1. `tests/playwright/tests/api.spec.js`
 
 ### API-01 List products
 - **Endpoint:** `GET /wp-json/wc/store/products`
