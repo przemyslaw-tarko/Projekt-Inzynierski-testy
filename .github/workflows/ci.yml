@@ -106,7 +106,7 @@ jobs:
           TESTRAIL_API_KEY: ${{ secrets.TESTRAIL_API_KEY }}
           TESTRAIL_PROJECT_ID: ${{ secrets.TESTRAIL_PROJECT_ID }}
           TESTRAIL_RUN_ID: ${{ secrets.TESTRAIL_RUN_ID }}
-        run: node scripts/compose.js all run --rm selenium-tests
+        run: node scripts/run-selenium.js
 
       - name: Upload reports
         if: always()

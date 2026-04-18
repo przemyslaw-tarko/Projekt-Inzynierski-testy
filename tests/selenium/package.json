@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
-    "test": "node scripts/wait-for-url.js && mocha --timeout 60000 --reporter mocha-multi-reporters --reporter-options configFile=./mocha-reporters.json \"specs/**/*.test.js\""
+    "test": "node scripts/wait-for-url.js && node scripts/wait-for-selenium.js && mocha --timeout 60000 --reporter mocha-multi-reporters --reporter-options configFile=./mocha-reporters.json \"specs/**/*.test.js\""
   },
   "dependencies": {
     "mocha": "^11.7.5",

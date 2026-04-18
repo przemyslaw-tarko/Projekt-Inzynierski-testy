@@ -1,8 +1,8 @@
 const assert = require('node:assert');
-const { Builder, By, until } = require('selenium-webdriver');
+const { By, until } = require('selenium-webdriver');
+const { buildDriverWithRetry, quitDriver } = require('../support/driver');
 
 const baseUrl = process.env.BASE_URL || 'http://wordpress';
-const seleniumRemoteUrl = process.env.SELENIUM_REMOTE_URL || 'http://selenium-chrome:4444/wd/hub';
 
 describe('Bookstore smoke (Selenium)', function () {
   this.timeout(60000);
@@ -10,11 +10,11 @@ describe('Bookstore smoke (Selenium)', function () {
   let driver;
 
   before(async () => {
-    driver = await new Builder().usingServer(seleniumRemoteUrl).forBrowser('chrome').build();
+    driver = await buildDriverWithRetry();
   });
 
   after(async () => {
-    if (driver) await driver.quit();
+    await quitDriver(driver);
   });
 
   it('title contains "Test App"', async () => {
@@ -24,5 +24,3 @@ describe('Bookstore smoke (Selenium)', function () {
     assert.ok(title.includes('Test App'));
   });
 });
-
-// test s 1

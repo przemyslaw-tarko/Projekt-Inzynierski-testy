@@ -12,7 +12,10 @@ const baseComposeArgs = [
 ];
 
 const steps = [
-  { name: 'selenium', cmd: ['docker', ...baseComposeArgs, 'run', '--rm', 'selenium-tests'] },
+  {
+    name: 'selenium',
+    cmd: [process.execPath, 'scripts/run-selenium.js']
+  },
   { name: 'cypress', cmd: ['docker', ...baseComposeArgs, 'run', '--rm', 'cypress-tests'] },
   { name: 'playwright', cmd: ['docker', ...baseComposeArgs, 'run', '--rm', 'playwright-tests'] }
 ];
