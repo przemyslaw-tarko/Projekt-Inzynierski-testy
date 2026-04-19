@@ -348,10 +348,12 @@ jobs:
         run: |
           set -euo pipefail
           fail=0
+
           if [[ "$LINT_RESULT" != "success" ]]; then
             echo "lint failed"
             fail=1
           fi
+
           for result in "$SELENIUM_RESULT" "$CYPRESS_RESULT" "$PLAYWRIGHT_RESULT"; do
             if [[ "$result" != "success" && "$result" != "skipped" ]]; then
               echo "tests failed"
