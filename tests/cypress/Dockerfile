@@ -4,4 +4,6 @@ WORKDIR /work/tests/cypress
 
 COPY tests/cypress ./
 
+ENTRYPOINT []
+
 CMD ["npm", "run", "test"]

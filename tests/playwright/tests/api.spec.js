@@ -29,7 +29,7 @@ test.describe('API - Store (public)', () => {
     tags = tagsRes.data;
   });
 
-  test('list products', () => {
+  test('[C58] list products', () => {
     test.step('Validate products list is an array', () => {
       expect(Array.isArray(products)).toBe(true);
     });
@@ -38,7 +38,7 @@ test.describe('API - Store (public)', () => {
     });
   });
 
-  test('get product by id', async ({ request }) => {
+  test('[C59] get product by id', async ({ request }) => {
     const product = getFirstItem(products);
     test.skip(!product, 'No products available');
     const { res, data } = await test.step('Fetch product by id', async () => {
@@ -50,7 +50,7 @@ test.describe('API - Store (public)', () => {
     });
   });
 
-  test('search products', async ({ request }) => {
+  test('[C60] search products', async ({ request }) => {
     const product = getFirstItem(products);
     test.skip(!product || !product.name, 'No searchable product');
     const term = product.name.split(' ').find(Boolean);
@@ -65,7 +65,7 @@ test.describe('API - Store (public)', () => {
     });
   });
 
-  test('pagination respects per_page', async ({ request }) => {
+  test('[C61] pagination respects per_page', async ({ request }) => {
     const { res, data } = await test.step('Fetch products with per_page=2', async () => {
       return fetchJson(request, '/wp-json/wc/store/products?per_page=2&page=1');
     });
@@ -76,13 +76,13 @@ test.describe('API - Store (public)', () => {
     });
   });
 
-  test('categories list returns array', () => {
+  test('[C62] categories list returns array', () => {
     test.step('Validate categories list is an array', () => {
       expect(Array.isArray(categories)).toBe(true);
     });
   });
 
-  test('category by id', async ({ request }) => {
+  test('[C63] category by id', async ({ request }) => {
     const category = getFirstItem(categories);
     test.skip(!category, 'No categories available');
     const { res, data } = await test.step('Fetch category by id', async () => {
@@ -94,7 +94,7 @@ test.describe('API - Store (public)', () => {
     });
   });
 
-  test('tags list returns array', () => {
+  test('[C64] tags list returns array', () => {
     test.step('Validate tags list is an array', () => {
       expect(Array.isArray(tags)).toBe(true);
     });

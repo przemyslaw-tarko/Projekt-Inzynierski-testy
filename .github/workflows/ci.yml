@@ -101,11 +101,6 @@ jobs:
       - name: Run Selenium tests
         env:
           TESTRAIL_ENABLED: ${{ secrets.TESTRAIL_ENABLED || 'false' }}
-          TESTRAIL_URL: ${{ secrets.TESTRAIL_URL }}
-          TESTRAIL_USER: ${{ secrets.TESTRAIL_USER }}
-          TESTRAIL_API_KEY: ${{ secrets.TESTRAIL_API_KEY }}
-          TESTRAIL_PROJECT_ID: ${{ secrets.TESTRAIL_PROJECT_ID }}
-          TESTRAIL_RUN_ID: ${{ secrets.TESTRAIL_RUN_ID }}
         run: node scripts/run-selenium.js
 
       - name: Upload reports
@@ -113,7 +108,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: reports-selenium
-          path: reports
+          path: reports/selenium
           if-no-files-found: warn
 
       - name: Teardown
@@ -148,11 +143,6 @@ jobs:
       - name: Run Cypress tests
         env:
           TESTRAIL_ENABLED: ${{ secrets.TESTRAIL_ENABLED || 'false' }}
-          TESTRAIL_URL: ${{ secrets.TESTRAIL_URL }}
-          TESTRAIL_USER: ${{ secrets.TESTRAIL_USER }}
-          TESTRAIL_API_KEY: ${{ secrets.TESTRAIL_API_KEY }}
-          TESTRAIL_PROJECT_ID: ${{ secrets.TESTRAIL_PROJECT_ID }}
-          TESTRAIL_RUN_ID: ${{ secrets.TESTRAIL_RUN_ID }}
         run: node scripts/compose.js all run --rm cypress-tests
 
       - name: Upload reports
@@ -160,7 +150,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: reports-cypress
-          path: reports
+          path: reports/cypress
           if-no-files-found: warn
 
       - name: Teardown
@@ -195,11 +185,6 @@ jobs:
       - name: Run Playwright tests
         env:
           TESTRAIL_ENABLED: ${{ secrets.TESTRAIL_ENABLED || 'false' }}
-          TESTRAIL_URL: ${{ secrets.TESTRAIL_URL }}
-          TESTRAIL_USER: ${{ secrets.TESTRAIL_USER }}
-          TESTRAIL_API_KEY: ${{ secrets.TESTRAIL_API_KEY }}
-          TESTRAIL_PROJECT_ID: ${{ secrets.TESTRAIL_PROJECT_ID }}
-          TESTRAIL_RUN_ID: ${{ secrets.TESTRAIL_RUN_ID }}
         run: node scripts/compose.js all run --rm playwright-tests
 
       - name: Upload reports
@@ -207,16 +192,148 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: reports-playwright
-          path: reports
+          path: reports/playwright
           if-no-files-found: warn
 
       - name: Teardown
         if: always()
         run: node scripts/compose.js all down --remove-orphans || true
 
+  testrail-selenium:
+    runs-on: ubuntu-latest
+    needs: [changes, tests-selenium]
+    if: always() && (needs.changes.outputs.selenium == 'true' || needs.changes.outputs.shared == 'true')
+    env:
+      TESTRAIL_ENABLED: ${{ secrets.TESTRAIL_ENABLED || 'false' }}
+    steps:
+      - name: Download Selenium reports
+        if: env.TESTRAIL_ENABLED == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: reports-selenium
+          path: reports-selenium
+
+      - name: Verify Selenium JUnit report exists
+        if: env.TESTRAIL_ENABLED == 'true'
+        run: test -f reports-selenium/junit/results.xml
+
+      - name: Setup Python
+        if: env.TESTRAIL_ENABLED == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install trcli
+        if: env.TESTRAIL_ENABLED == 'true'
+        run: pip install trcli
+
+      - name: Upload Selenium report to TestRail
+        if: env.TESTRAIL_ENABLED == 'true'
+        env:
+          TESTRAIL_URL: ${{ secrets.TESTRAIL_URL }}
+          TESTRAIL_USER: ${{ secrets.TESTRAIL_USER }}
+          TESTRAIL_API_KEY: ${{ secrets.TESTRAIL_API_KEY }}
+        run: |
+          trcli -y \
+            -h "$TESTRAIL_URL" \
+            --project "Projekt-Inzynierski-testy" \
+            --username "$TESTRAIL_USER" \
+            --password "$TESTRAIL_API_KEY" \
+            parse_junit \
+            --title "Selenium | PR #${{ github.event.pull_request.number }} | Run #${{ github.run_number }}" \
+            -f "reports-selenium/junit/results.xml"
+
+  testrail-cypress:
+    runs-on: ubuntu-latest
+    needs: [changes, tests-cypress]
+    if: always() && (needs.changes.outputs.cypress == 'true' || needs.changes.outputs.shared == 'true')
+    env:
+      TESTRAIL_ENABLED: ${{ secrets.TESTRAIL_ENABLED || 'false' }}
+    steps:
+      - name: Download Cypress reports
+        if: env.TESTRAIL_ENABLED == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: reports-cypress
+          path: reports-cypress
+
+      - name: Verify Cypress JUnit report exists
+        if: env.TESTRAIL_ENABLED == 'true'
+        run: test -f reports-cypress/junit/results.xml
+
+      - name: Setup Python
+        if: env.TESTRAIL_ENABLED == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install trcli
+        if: env.TESTRAIL_ENABLED == 'true'
+        run: pip install trcli
+
+      - name: Upload Cypress report to TestRail
+        if: env.TESTRAIL_ENABLED == 'true'
+        env:
+          TESTRAIL_URL: ${{ secrets.TESTRAIL_URL }}
+          TESTRAIL_USER: ${{ secrets.TESTRAIL_USER }}
+          TESTRAIL_API_KEY: ${{ secrets.TESTRAIL_API_KEY }}
+        run: |
+          trcli -y \
+            -h "$TESTRAIL_URL" \
+            --project "Projekt-Inzynierski-testy" \
+            --username "$TESTRAIL_USER" \
+            --password "$TESTRAIL_API_KEY" \
+            parse_junit \
+            --title "Cypress | PR #${{ github.event.pull_request.number }} | Run #${{ github.run_number }}" \
+            -f "reports-cypress/junit/results.xml"
+
+  testrail-playwright:
+    runs-on: ubuntu-latest
+    needs: [changes, tests-playwright]
+    if: always() && (needs.changes.outputs.playwright == 'true' || needs.changes.outputs.shared == 'true')
+    env:
+      TESTRAIL_ENABLED: ${{ secrets.TESTRAIL_ENABLED || 'false' }}
+    steps:
+      - name: Download Playwright reports
+        if: env.TESTRAIL_ENABLED == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: reports-playwright
+          path: reports-playwright
+
+      - name: Verify Playwright JUnit report exists
+        if: env.TESTRAIL_ENABLED == 'true'
+        run: test -f reports-playwright/junit/results.xml
+
+      - name: Setup Python
+        if: env.TESTRAIL_ENABLED == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install trcli
+        if: env.TESTRAIL_ENABLED == 'true'
+        run: pip install trcli
+
+      - name: Upload Playwright report to TestRail
+        if: env.TESTRAIL_ENABLED == 'true'
+        env:
+          TESTRAIL_URL: ${{ secrets.TESTRAIL_URL }}
+          TESTRAIL_USER: ${{ secrets.TESTRAIL_USER }}
+          TESTRAIL_API_KEY: ${{ secrets.TESTRAIL_API_KEY }}
+        run: |
+          trcli -y \
+            -h "$TESTRAIL_URL" \
+            --project "Projekt-Inzynierski-testy" \
+            --username "$TESTRAIL_USER" \
+            --password "$TESTRAIL_API_KEY" \
+            parse_junit \
+            --title "Playwright | PR #${{ github.event.pull_request.number }} | Run #${{ github.run_number }}" \
+            -f "reports-playwright/junit/results.xml"
+
   ci-summary:
     runs-on: ubuntu-latest
-    needs: [lint, tests-selenium, tests-cypress, tests-playwright]
+    needs: [lint, tests-selenium, tests-cypress, tests-playwright, testrail-selenium, testrail-cypress, testrail-playwright]
     if: always()
     steps:
       - name: Evaluate
@@ -225,6 +342,9 @@ jobs:
           SELENIUM_RESULT: ${{ needs.tests-selenium.result }}
           CYPRESS_RESULT: ${{ needs.tests-cypress.result }}
           PLAYWRIGHT_RESULT: ${{ needs.tests-playwright.result }}
+          TESTRAIL_SELENIUM_RESULT: ${{ needs.testrail-selenium.result }}
+          TESTRAIL_CYPRESS_RESULT: ${{ needs.testrail-cypress.result }}
+          TESTRAIL_PLAYWRIGHT_RESULT: ${{ needs.testrail-playwright.result }}
         run: |
           set -euo pipefail
           fail=0
@@ -235,6 +355,12 @@ jobs:
           for result in "$SELENIUM_RESULT" "$CYPRESS_RESULT" "$PLAYWRIGHT_RESULT"; do
             if [[ "$result" != "success" && "$result" != "skipped" ]]; then
               echo "tests failed"
+              fail=1
+            fi
+          done
+          for result in "$TESTRAIL_SELENIUM_RESULT" "$TESTRAIL_CYPRESS_RESULT" "$TESTRAIL_PLAYWRIGHT_RESULT"; do
+            if [[ "$result" != "success" && "$result" != "skipped" ]]; then
+              echo "testrail upload failed"
               fail=1
             fi
           done

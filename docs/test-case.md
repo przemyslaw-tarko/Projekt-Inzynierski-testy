@@ -9,35 +9,35 @@ Ten plik opisuje zaimplementowane testy dla użycia i porównania frameworków.
 UI:
 - `tests/playwright/tests/ui.spec.js`
 - `tests/cypress/e2e/ui.cy.js`
-- `tests/playwrighy/specs/ui.test.js`
+- `tests/selenium/specs/ui.test.js`
   
 API:
 - `tests/playwright/tests/api.spec.js`
 - `tests/cypress/e2e/api.cy.js`
-- `tests/playwrighy/specs/api.test.js`
+- `tests/selenium/specs/api.test.js`
   
 ## UI – Główne Przepływy Użytkownika  
 
-### UI-01 Home page loads
+### UI-01 [C46] Home page loads
 - **Preconditions:** Aplikacja działa.
 - **Steps:**
   1. Otwórz `/`.
 - **Expected:** Tytuł strony zawiera „Test App”.
 
-### UI-02 Shop shows product list
+### UI-02 [C47] Shop shows product list
 - **Preconditions:** Aplikacja działa.
 - **Steps:**
   1. Otwórz `/shop`.
 - **Expected:** Siatka produktów jest widoczna i zawiera co najmniej jeden produkt.
 
-### UI-03 Product details show title and price
+### UI-03 [C48] Product details show title and price
 - **Preconditions:** Aplikacja działa.
 - **Steps:**
   1. Otwórz `/shop`.
   2. Otwórz pierwszy produkt.
 - **Expected:** Widoczny jest tytuł i cena produktu.
 
-### UI-04 Add to cart from shop
+### UI-04 [C49] Add to cart from shop
 - **Preconditions:** Aplikacja działa.
 - **Steps:**
   1. Otwórz `/shop`.
@@ -45,7 +45,7 @@ API:
   3. Otwórz `/cart`.
 - **Expected:** Koszyk zawiera co najmniej jeden produkt.
 
-### UI-05 Remove product from cart
+### UI-05 [C50] Remove product from cart
 - **Preconditions:** Aplikacja działa.
 - **Steps:**
   1. Wyczyść koszyk (jeśli trzeba).
@@ -53,7 +53,7 @@ API:
   3. Otwórz `/cart` i usuń produkt.
 - **Expected:** Widoczny jest pusty koszyk albo komunikat koszyka.
 
-### UI-06 Cart persists after refresh
+### UI-06 [C51] Cart persists after refresh
 - **Preconditions:** Aplikacja działa.
 - **Steps:**
   1. Wyczyść koszyk (jeśli trzeba).
@@ -61,7 +61,7 @@ API:
   3. Otwórz `/cart` i odśwież stronę.
 - **Expected:** Koszyk nadal zawiera produkt.
 
-### UI-07 Checkout shows Stripe validation error
+### UI-07 [C52] Checkout shows Stripe validation error
 - **Preconditions:** Aplikacja działa.
 - **Steps:**
   1. Wyczyść koszyk (jeśli trzeba).
@@ -70,33 +70,33 @@ API:
   4. Kliknij „Place order”.
 - **Expected:** Pojawia się błąd Stripe albo pole Stripe jest oznaczone jako nieprawidłowe, (wyświetlony komunikat "The card number is incomplete").
 
-### UI-08 Search products
+### UI-08 [C53] Search products
 - **Preconditions:** Aplikacja działa.
 - **Steps:**
   1. Otwórz `/shop`.
   2. Wyszukaj „astronomy”.
 - **Expected:** Lista wyników zawiera produkty.
 
-### UI-09 Sort products by price
+### UI-09 [C54] Sort products by price
 - **Preconditions:** Aplikacja działa.
 - **Steps:**
   1. Otwórz `/shop`.
   2. Wybierz sortowanie po cenie (rosnąco).
 - **Expected:** Ceny produktów są widoczne.
 
-### UI-10 Product images visible
+### UI-10 [C55] Product images visible
 - **Preconditions:** Aplikacja działa.
 - **Steps:**
   1. Otwórz `/shop`.
 - **Expected:** Widoczne są obrazy produktów.
 
-### UI-11 404 for missing route
+### UI-11 [C56] 404 for missing route
 - **Preconditions:** Aplikacja działa.
 - **Steps:**
   1. Otwórz `/this-page-should-not-exist`.
 - **Expected:** Strona renderuje się (treść "Oops! That page can’t be" jest wyświetlana).
 
-### UI-12 Mobile viewport basic layout
+### UI-12 [C57] Mobile viewport basic layout
 - **Preconditions:** Aplikacja działa.
 - **Steps:**
   1. Ustaw viewport na 375×667.
@@ -105,30 +105,30 @@ API:
 
 ## API – Store (Public) 
 
-### API-01 List products
+### API-01 [C58] List products
 - **Endpoint:** `GET /wp-json/wc/store/products`
 - **Expected:** Status 200, odpowiedź to tablica z co najmniej jednym produktem.
 
-### API-02 Get product by ID
+### API-02 [C59] Get product by ID
 - **Endpoint:** `GET /wp-json/wc/store/products/:id`
 - **Expected:** Status 200, `id` w odpowiedzi jest zgodne z żądanym produktem.
 
-### API-03 Search products
+### API-03 [C60] Search products
 - **Endpoint:** `GET /wp-json/wc/store/products?search=...`
 - **Expected:** Status 200, tablica odpowiedzi nie jest pusta.
 
-### API-04 Pagination respects per_page
+### API-04 [C61] Pagination respects per_page
 - **Endpoint:** `GET /wp-json/wc/store/products?per_page=2&page=1`
-- **Expected:** Status 200, długość tablicy odpowiedzi ≤ 2.
+- **Expected:** Status 200, długość tablicy odpowiedzi <= 2.
 
-### API-05 Categories list
+### API-05 [C62] Categories list
 - **Endpoint:** `GET /wp-json/wc/store/products/categories`
 - **Expected:** Status 200, odpowiedź to tablica.
 
-### API-06 Category by ID
+### API-06 [C63] Category by ID
 - **Endpoint:** `GET /wp-json/wc/store/products/categories/:id`
 - **Expected:** Status 200, `id` w odpowiedzi jest zgodne z żądaną kategorią.
 
-### API-07 Tags list
+### API-07 [C64] Tags list
 - **Endpoint:** `GET /wp-json/wc/store/products/tags`
 - **Expected:** Status 200, odpowiedź to tablica.

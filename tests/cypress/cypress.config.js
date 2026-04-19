@@ -9,6 +9,7 @@ module.exports = defineConfig({
   },
   reporter: 'junit',
   reporterOptions: {
-    mochaFile: '../../reports/cypress/junit/results.[hash].xml'
+    mochaFile: '../../reports/cypress/junit/results.[hash].xml',
+    toConsole: true
   }
 });

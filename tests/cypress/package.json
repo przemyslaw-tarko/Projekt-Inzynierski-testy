@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
-    "test": "node scripts/wait-for-url.js && cypress run"
+    "test": "node scripts/wait-for-url.js && node scripts/run-and-merge-junit.js"
   },
   "devDependencies": {
     "cypress": "^15.11.0"
