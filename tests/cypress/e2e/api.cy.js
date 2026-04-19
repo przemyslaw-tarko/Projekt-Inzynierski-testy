@@ -70,4 +70,4 @@ describe('API - Store (public) (Cypress)', () => {
     expect(Array.isArray(tags)).to.eq(true);
   });
 });
-//test1
+//test2
