@@ -132,3 +132,105 @@ API:
 ### API-07 [C64] Tags list
 - **Endpoint:** `GET /wp-json/wc/store/products/tags`
 - **Expected:** Status 200, odpowiedź to tablica.
+
+## Propozycje case'ow pod statusy TestRail
+
+Te przypadki nie są klasycznym zestawem regresyjnym. Ich celem jest sprawdzenie, czy integracja Framework -> JUnit -> TestRail poprawnie raportuje statusy inne niż sam sukces.
+
+
+### PW-STATUS-UI-01 Shop [C128] blocked by maintenance page
+- **Framework:** Playwright UI
+- **Target TestRail status:** `Blocked` albo `Skipped` (zalezne od mapowania `<skipped>`)
+- **Preconditions:** Aplikacja storefront zwraca `503` albo strone maintenance dla `/shop`.
+- **Steps:**
+  1. Wykonaj preflight `GET /shop`.
+  2. Jesli odpowiedz nie jest gotowa do testu (`503`, maintenance banner, brak glownej tresci), zakoncz test jako `skip`.
+- **Expected:** Wynik ma reprezentowac brak mozliwosci wykonania testu z powodu niedostepnosci aplikacji, a nie blad logiki testu.
+
+### PW-STATUS-UI-02 [C129] Checkout blocked by missing Stripe dependency
+- **Framework:** Playwright UI
+- **Target TestRail status:** `Blocked` albo `Skipped`
+- **Preconditions:** Stripe gateway jest wylaczony, nie laduje sie iframe Stripe albo brakuje konfiguracji checkoutu.
+- **Steps:**
+  1. Dodaj produkt do koszyka.
+  2. Otworz `/checkout`.
+  3. Sprawdz, czy komponent Stripe jest dostepny.
+  4. Jesli zaleznosc nie jest dostepna, zakoncz test jako `skip`.
+- **Expected:** Test ma sygnalizowac zablokowanie przez zaleznosc zewnetrzna, a nie falszywy `fail`.
+
+### PW-STATUS-UI-03 [C130] Add to cart count intentionally fails
+- **Framework:** Playwright UI
+- **Target TestRail status:** `Automation Failed`
+- **Preconditions:** Aplikacja dziala poprawnie.
+- **Steps:**
+  1. Otworz `/shop`.
+  2. Dodaj pierwszy produkt do koszyka.
+  3. Odczytaj licznik lub stan koszyka.
+  4. Celowo asercja oczekuje wartosci `2` po pojedynczym dodaniu produktu.
+- **Expected:** Test powinien zakonczyc sie klasycznym assertion failure i trafic do statusu `Automation Failed`.
+
+### PW-STATUS-UI-04 [C131] Search result forced failure
+- **Framework:** Playwright UI
+- **Target TestRail status:** `Automation Failed`
+- **Preconditions:** Aplikacja dziala poprawnie.
+- **Steps:**
+  1. Otworz `/shop`.
+  2. Wyszukaj fraze, ktora nie ma wynikow, np. `zzzz-unlikely-term`.
+  3. Celowo sprawdz, ze pierwszy produkt z listy wynikow jest widoczny.
+- **Expected:** Test powinien zakonczyc sie niepowodzeniem asercji, co daje czytelny sygnal `Automation Failed`.
+
+### PW-STATUS-UI-05 [C132] Runtime error while reading product details
+- **Framework:** Playwright UI
+- **Target TestRail status:** `Automation Error`
+- **Preconditions:** Aplikacja dziala poprawnie.
+- **Steps:**
+  1. Otworz `/shop`.
+  2. Pobierz pierwszy produkt.
+  3. Po przejsciu przez preconditions wymus runtime error w kodzie testu, np. przez odwolanie do nieistniejacej struktury danych lub jawne `throw new Error(...)`.
+- **Expected:** Test powinien zakonczyc sie bledem wykonania, a nie zwykla nieudana asercja, tak aby raport trafil do `Automation Error`.
+
+### PW-STATUS-API-01 [C133] Products endpoint blocked by unavailable backend
+- **Framework:** Playwright API
+- **Target TestRail status:** `Blocked` albo `Skipped`
+- **Preconditions:** Backend WordPress/WooCommerce zwraca `503` dla `GET /wp-json/wc/store/products`.
+- **Steps:**
+  1. Wykonaj request do `GET /wp-json/wc/store/products`.
+  2. Jesli backend jest niedostepny, zakoncz test jako `skip`.
+- **Expected:** Test sygnalizuje brak mozliwosci wykonania z powodu niedostepnego srodowiska.
+
+### PW-STATUS-API-02 [C134] Categories test skipped when catalog seed is absent
+- **Framework:** Playwright API
+- **Target TestRail status:** `Blocked` albo `Skipped`
+- **Preconditions:** Srodowisko jest uruchomione, ale dane katalogowe nie zostaly zaladowane lub lista kategorii jest pusta.
+- **Steps:**
+  1. Wykonaj request do `GET /wp-json/wc/store/products/categories`.
+  2. Jesli odpowiedz jest pusta, zakoncz test jako `skip`.
+- **Expected:** Wynik ma komunikowac brak precondition danych testowych, a nie blad produktu.
+
+### PW-STATUS-API-03 [C135] Invalid product id expected as success
+- **Framework:** Playwright API
+- **Target TestRail status:** `Automation Failed`
+- **Preconditions:** Aplikacja dziala poprawnie.
+- **Steps:**
+  1. Wykonaj request do `GET /wp-json/wc/store/products/999999`.
+  2. Celowo oczekuj statusu `200` i poprawnego payloadu produktu.
+- **Expected:** Test powinien zakonczyc sie assertion failure, co w TestRail ma dac `Automation Failed`.
+
+### PW-STATUS-API-04 [C136] Pagination assertion intentionally overstates result count
+- **Framework:** Playwright API
+- **Target TestRail status:** `Automation Failed`
+- **Preconditions:** Aplikacja dziala poprawnie.
+- **Steps:**
+  1. Wykonaj request do `GET /wp-json/wc/store/products?per_page=2&page=1`.
+  2. Celowo asercja wymaga wiecej niz 2 rekordow.
+- **Expected:** Raport powinien pokazac przewidywalny assertion failure.
+
+### PW-STATUS-API-05 [C137] Runtime error on non-JSON response parsing
+- **Framework:** Playwright API
+- **Target TestRail status:** `Automation Error`
+- **Preconditions:** Aplikacja dziala poprawnie.
+- **Steps:**
+  1. Wykonaj request do endpointu HTML, np. `/cart` albo `/checkout`.
+  2. Celowo potraktuj odpowiedz jako JSON.
+  3. Dopuszczalne jest tez jawne rzucenie wyjatku po pozytywnym przejsciu precondition.
+- **Expected:** Test powinien zakonczyc sie bledem wykonania i trafic do `Automation Error`.
