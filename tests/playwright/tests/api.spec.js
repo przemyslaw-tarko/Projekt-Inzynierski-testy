@@ -100,4 +100,3 @@ test.describe('API - Store (public)', () => {
     });
   });
 });
-// test 1
