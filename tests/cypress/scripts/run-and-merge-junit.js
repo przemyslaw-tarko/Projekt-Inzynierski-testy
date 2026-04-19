@@ -28,7 +28,22 @@ function listIntermediateXml() {
 }
 
 function extractTestSuites(xml) {
-  return xml.match(/<testsuite[\s\S]*?<\/testsuite>/g) || [];
+  const normalized = xml.replace(/<\?xml[\s\S]*?\?>/g, '');
+  const withoutWrappers = normalized
+    .replace(/<testsuites\b[^>]*>/g, '')
+    .replace(/<\/testsuites>/g, '');
+
+  return withoutWrappers.match(/<testsuite\b[\s\S]*?<\/testsuite>/g) || [];
+}
+
+function readAttrValue(fragment, attrName) {
+  const match = fragment.match(new RegExp(`${attrName}="([^"]*)"`, 'i'));
+  return match ? match[1] : '';
+}
+
+function readNumericAttr(fragment, attrName) {
+  const value = Number.parseFloat(readAttrValue(fragment, attrName) || '0');
+  return Number.isFinite(value) ? value : 0;
 }
 
 function mergeJUnit() {
@@ -40,14 +55,25 @@ function mergeJUnit() {
   }
 
   const suites = [];
+  let totalTests = 0;
+  let totalFailures = 0;
+  let totalSkipped = 0;
+  let totalErrors = 0;
+  let totalTime = 0;
+
   for (const filePath of intermediateFiles) {
     const xml = fs.readFileSync(filePath, 'utf8');
+    totalTests += readNumericAttr(xml, 'tests');
+    totalFailures += readNumericAttr(xml, 'failures');
+    totalSkipped += readNumericAttr(xml, 'skipped');
+    totalErrors += readNumericAttr(xml, 'errors');
+    totalTime += readNumericAttr(xml, 'time');
     suites.push(...extractTestSuites(xml));
   }
 
   const merged =
     '<?xml version="1.0" encoding="UTF-8"?>\n' +
-    '<testsuites>\n' +
+    `<testsuites name="Mocha Tests" tests="${totalTests}" failures="${totalFailures}" skipped="${totalSkipped}" errors="${totalErrors}" time="${totalTime.toFixed(3)}">\n` +
     suites.map((suite) => `${suite}\n`).join('') +
     '</testsuites>\n';
 

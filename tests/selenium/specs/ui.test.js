@@ -250,4 +250,3 @@ describe('UI - Core User Flows (Selenium)', function () {
     assert.ok(await main.isDisplayed());
   });
 });
-// test1
