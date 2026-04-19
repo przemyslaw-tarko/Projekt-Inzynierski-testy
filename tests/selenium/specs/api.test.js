@@ -32,12 +32,12 @@ describe('API - Store (public) (Selenium)', function () {
     tags = tagsRes.data;
   });
 
-  it('list products', () => {
+  it('[C58] list products', () => {
     assert.ok(Array.isArray(products));
     assert.ok(products.length > 0);
   });
 
-  it('get product by id', async function () {
+  it('[C59] get product by id', async function () {
     const product = getFirstItem(products);
     if (!product) this.skip();
     const { res, data } = await fetchJson(`/wp-json/wc/store/products/${product.id}`);
@@ -45,7 +45,7 @@ describe('API - Store (public) (Selenium)', function () {
     assert.strictEqual(data.id, product.id);
   });
 
-  it('search products', async function () {
+  it('[C60] search products', async function () {
     const product = getFirstItem(products);
     const term = product && product.name ? product.name.split(' ').find(Boolean) : null;
     if (!term) this.skip();
@@ -57,18 +57,18 @@ describe('API - Store (public) (Selenium)', function () {
     assert.ok(data.length > 0);
   });
 
-  it('pagination respects per_page', async () => {
+  it('[C61] pagination respects per_page', async () => {
     const { res, data } = await fetchJson('/wp-json/wc/store/products?per_page=2&page=1');
     assert.strictEqual(res.status, 200);
     assert.ok(Array.isArray(data));
     assert.ok(data.length <= 2);
   });
 
-  it('categories list returns array', () => {
+  it('[C62] categories list returns array', () => {
     assert.ok(Array.isArray(categories));
   });
 
-  it('category by id', async function () {
+  it('[C63] category by id', async function () {
     const category = getFirstItem(categories);
     if (!category) this.skip();
     const { res, data } = await fetchJson(
@@ -78,7 +78,7 @@ describe('API - Store (public) (Selenium)', function () {
     assert.strictEqual(data.id, category.id);
   });
 
-  it('tags list returns array', () => {
+  it('[C64] tags list returns array', () => {
     assert.ok(Array.isArray(tags));
   });
 });

@@ -17,32 +17,32 @@ async function clearCart(page) {
 }
 
 test.describe('UI - Core User Flows', () => {
-  test('home page loads and title contains "Test App"', async ({ page }) => {
+  test('[C46] home page loads and title contains "Test App"', async ({ page }) => {
     await page.goto(toUrl('/'));
     await expect(page).toHaveTitle(/Test App/i);
   });
 
-  test('shop page shows product list', async ({ page }) => {
+  test('[C47] shop page shows product list', async ({ page }) => {
     await page.goto(toUrl('/shop'));
     const products = page.locator('.products .product');
     await expect(products.first()).toBeVisible();
     expect(await products.count()).toBeGreaterThan(0);
   });
 
-  test('product page shows title and price', async ({ page }) => {
+  test('[C48] product page shows title and price', async ({ page }) => {
     await page.goto(toUrl('/shop'));
     await page.locator('.products .product a').first().click();
     await expect(page.locator('.product_title')).toBeVisible();
     await expect(page.locator('.summary .price')).toBeVisible();
   });
 
-  test('add to cart from shop and verify in cart', async ({ page }) => {
+  test('[C49] add to cart from shop and verify in cart', async ({ page }) => {
     await addFirstProductToCart(page);
     await page.goto(toUrl('/cart'));
     await expect(page.locator('.cart_item').first()).toBeVisible();
   });
 
-  test('remove product from cart', async ({ page }) => {
+  test('[C50] remove product from cart', async ({ page }) => {
     await clearCart(page);
     await addFirstProductToCart(page);
     await page.goto(toUrl('/cart'));
@@ -50,7 +50,7 @@ test.describe('UI - Core User Flows', () => {
     await expect(page.locator('.cart-empty, .woocommerce-message').first()).toBeVisible();
   });
 
-  test('cart persists after refresh', async ({ page }) => {
+  test('[C51] cart persists after refresh', async ({ page }) => {
     await clearCart(page);
     await addFirstProductToCart(page);
     await page.goto(toUrl('/cart'));
@@ -58,7 +58,7 @@ test.describe('UI - Core User Flows', () => {
     await expect(page.locator('.cart_item').first()).toBeVisible();
   });
 
-  test('checkout shows validation errors for empty required fields', async ({ page }) => {
+  test('[C52] checkout shows validation errors for empty required fields', async ({ page }) => {
     await clearCart(page);
     await addFirstProductToCart(page);
     await page.goto(toUrl('/checkout'));
@@ -75,30 +75,30 @@ test.describe('UI - Core User Flows', () => {
     }).toBeGreaterThan(0);
   });
 
-  test('search for "astronomy" returns results', async ({ page }) => {
+  test('[C53] search for "astronomy" returns results', async ({ page }) => {
     await page.goto(toUrl('/shop'));
     await page.locator('input[type="search"], input[name="s"]').fill('astronomy');
     await page.keyboard.press('Enter');
     await expect(page.locator('.products .product').first()).toBeVisible();
   });
 
-  test('sort by price: low to high', async ({ page }) => {
+  test('[C54] sort by price: low to high', async ({ page }) => {
     await page.goto(toUrl('/shop'));
     await page.locator('select[name="orderby"]').selectOption({ value: 'price' });
     await expect(page.locator('.products .product .price').first()).toBeVisible();
   });
 
-  test('product images are visible on shop', async ({ page }) => {
+  test('[C55] product images are visible on shop', async ({ page }) => {
     await page.goto(toUrl('/shop'));
     await expect(page.locator('.products .product img').first()).toBeVisible();
   });
 
-  test('404 page for missing route', async ({ page }) => {
+  test('[C56] 404 page for missing route', async ({ page }) => {
     await page.goto(toUrl('/this-page-should-not-exist'));
     await expect(page.getByRole('heading', { name: /Oops! That page/i })).toBeVisible();
   });
 
-  test('mobile viewport basic layout', async ({ page }) => {
+  test('[C57] mobile viewport basic layout', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto(toUrl('/'));
     await expect(page.locator('#main')).toBeVisible();

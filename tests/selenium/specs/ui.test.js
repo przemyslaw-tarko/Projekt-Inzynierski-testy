@@ -21,7 +21,6 @@ async function clickElement(driver, element) {
   try {
     await element.click();
   } catch (err) {
-    // WooCommerce updates can briefly leave the element covered or stale after scroll.
     await driver.executeScript('arguments[0].click();', element);
   }
 }
@@ -112,19 +111,19 @@ describe('UI - Core User Flows (Selenium)', function () {
     }
   });
 
-  it('home page loads and title contains "Test App"', async () => {
+  it('[C46] home page loads and title contains "Test App"', async () => {
     await safeGet(driver, `${baseUrl}/`);
     const title = await driver.getTitle();
     assert.match(title, /Test App/i);
   });
 
-  it('shop page shows product list', async () => {
+  it('[C47] shop page shows product list', async () => {
     await safeGet(driver, `${baseUrl}/shop`);
     const products = await driver.findElements(By.css('.products .product'));
     assert.ok(products.length > 0);
   });
 
-  it('product page shows title and price', async () => {
+  it('[C48] product page shows title and price', async () => {
     await safeGet(driver, `${baseUrl}/shop`);
     const firstProduct = await driver.findElement(By.css('.products .product a'));
     await clickElement(driver, firstProduct);
@@ -132,14 +131,14 @@ describe('UI - Core User Flows (Selenium)', function () {
     await driver.wait(until.elementLocated(By.css('.summary .price')), 10000);
   });
 
-  it('add to cart from shop and verify in cart', async () => {
+  it('[C49] add to cart from shop and verify in cart', async () => {
     await addFirstProductToCart(driver);
     await safeGet(driver, `${baseUrl}/cart`);
     const items = await driver.findElements(By.css('.cart_item'));
     assert.ok(items.length > 0);
   });
 
-  it('remove product from cart', async () => {
+  it('[C50] remove product from cart', async () => {
     await clearCart(driver);
     await addFirstProductToCart(driver);
     await safeGet(driver, `${baseUrl}/cart`);
@@ -158,7 +157,7 @@ describe('UI - Core User Flows (Selenium)', function () {
     }, 20000);
   });
 
-  it('cart persists after refresh', async () => {
+  it('[C51] cart persists after refresh', async () => {
     await clearCart(driver);
     await addFirstProductToCart(driver);
     await safeGet(driver, `${baseUrl}/cart`);
@@ -173,7 +172,7 @@ describe('UI - Core User Flows (Selenium)', function () {
     }, 20000);
   });
 
-  it('checkout shows validation errors for empty required fields', async () => {
+  it('[C52] checkout shows validation errors for empty required fields', async () => {
     await clearCart(driver);
     await addFirstProductToCart(driver);
     await safeGet(driver, `${baseUrl}/checkout`);
@@ -200,7 +199,7 @@ describe('UI - Core User Flows (Selenium)', function () {
     }, 30000);
   });
 
-  it('search for "astronomy" returns results', async () => {
+  it('[C53] search for "astronomy" returns results', async () => {
     await safeGet(driver, `${baseUrl}/shop`);
     const searchInput = await driver.wait(
       until.elementLocated(By.css('input[type="search"], input[name="s"]')),
@@ -219,7 +218,7 @@ describe('UI - Core User Flows (Selenium)', function () {
     }, 10000);
   });
 
-  it('sort by price: low to high', async () => {
+  it('[C54] sort by price: low to high', async () => {
     await safeGet(driver, `${baseUrl}/shop`);
     const sortSelect = await driver.findElement(By.css('select[name="orderby"]'));
     await driver.executeScript(
@@ -233,18 +232,18 @@ describe('UI - Core User Flows (Selenium)', function () {
     await driver.wait(until.elementLocated(By.css('.products .product .price')), 10000);
   });
 
-  it('product images are visible on shop', async () => {
+  it('[C55] product images are visible on shop', async () => {
     await safeGet(driver, `${baseUrl}/shop`);
     await driver.wait(until.elementLocated(By.css('.products .product img')), 10000);
   });
 
-  it('404 page for missing route', async () => {
+  it('[C56] 404 page for missing route', async () => {
     await safeGet(driver, `${baseUrl}/this-page-should-not-exist`);
     const bodyText = await driver.findElement(By.css('body')).getText();
     assert.match(bodyText, /Oops/i);
   });
 
-  it('mobile viewport basic layout', async () => {
+  it('[C57] mobile viewport basic layout', async () => {
     await driver.manage().window().setRect({ width: 375, height: 667 });
     await safeGet(driver, `${baseUrl}/`);
     const main = await driver.findElement(By.css('#main'));

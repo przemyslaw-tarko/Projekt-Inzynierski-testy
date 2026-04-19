@@ -20,12 +20,12 @@ describe('API - Store (public) (Cypress)', () => {
     });
   });
 
-  it('list products', () => {
+  it('[C58] list products', () => {
     expect(Array.isArray(products)).to.eq(true);
     expect(products.length).to.be.greaterThan(0);
   });
 
-  it('get product by id', function () {
+  it('[C59] get product by id', function () {
     const product = Array.isArray(products) && products.length ? products[0] : null;
     if (!product) this.skip();
     cy.request(`/wp-json/wc/store/products/${product.id}`).then((res) => {
@@ -34,7 +34,7 @@ describe('API - Store (public) (Cypress)', () => {
     });
   });
 
-  it('search products', function () {
+  it('[C60] search products', function () {
     const product = Array.isArray(products) && products.length ? products[0] : null;
     const term = product && product.name ? product.name.split(' ').find(Boolean) : null;
     if (!term) this.skip();
@@ -45,7 +45,7 @@ describe('API - Store (public) (Cypress)', () => {
     });
   });
 
-  it('pagination respects per_page', () => {
+  it('[C61] pagination respects per_page', () => {
     cy.request('/wp-json/wc/store/products?per_page=2&page=1').then((res) => {
       expect(res.status).to.eq(200);
       expect(Array.isArray(res.body)).to.eq(true);
@@ -53,11 +53,11 @@ describe('API - Store (public) (Cypress)', () => {
     });
   });
 
-  it('categories list returns array', () => {
+  it('[C62] categories list returns array', () => {
     expect(Array.isArray(categories)).to.eq(true);
   });
 
-  it('category by id', function () {
+  it('[C63] category by id', function () {
     const category = Array.isArray(categories) && categories.length ? categories[0] : null;
     if (!category) this.skip();
     cy.request(`/wp-json/wc/store/products/categories/${category.id}`).then((res) => {
@@ -66,7 +66,7 @@ describe('API - Store (public) (Cypress)', () => {
     });
   });
 
-  it('tags list returns array', () => {
+  it('[C64] tags list returns array', () => {
     expect(Array.isArray(tags)).to.eq(true);
   });
 });
