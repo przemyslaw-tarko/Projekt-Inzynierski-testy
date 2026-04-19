@@ -206,6 +206,10 @@ jobs:
     env:
       TESTRAIL_ENABLED: ${{ secrets.TESTRAIL_ENABLED || 'false' }}
     steps:
+      - name: Checkout
+        if: env.TESTRAIL_ENABLED == 'true'
+        uses: actions/checkout@v4
+
       - name: Download Selenium reports
         if: env.TESTRAIL_ENABLED == 'true'
         uses: actions/download-artifact@v4
@@ -217,6 +221,15 @@ jobs:
         if: env.TESTRAIL_ENABLED == 'true'
         run: test -f reports-selenium/junit/results.xml
 
+      - name: Validate Selenium JUnit XML
+        if: env.TESTRAIL_ENABLED == 'true'
+        run: |
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          ET.parse("reports-selenium/junit/results.xml")
+          print("Selenium XML OK")
+          PY
+
       - name: Setup Python
         if: env.TESTRAIL_ENABLED == 'true'
         uses: actions/setup-python@v5
@@ -225,7 +238,7 @@ jobs:
 
       - name: Install trcli
         if: env.TESTRAIL_ENABLED == 'true'
-        run: pip install trcli
+        run: python -m pip install --upgrade pip trcli
 
       - name: Upload Selenium report to TestRail
         if: env.TESTRAIL_ENABLED == 'true'
@@ -240,6 +253,7 @@ jobs:
             --username "$TESTRAIL_USER" \
             --password "$TESTRAIL_API_KEY" \
             parse_junit \
+            --case-matcher "name" \
             --title "Selenium | PR #${{ github.event.pull_request.number }} | Run #${{ github.run_number }}" \
             -f "reports-selenium/junit/results.xml"
 
@@ -250,6 +264,10 @@ jobs:
     env:
       TESTRAIL_ENABLED: ${{ secrets.TESTRAIL_ENABLED || 'false' }}
     steps:
+      - name: Checkout
+        if: env.TESTRAIL_ENABLED == 'true'
+        uses: actions/checkout@v4
+
       - name: Download Cypress reports
         if: env.TESTRAIL_ENABLED == 'true'
         uses: actions/download-artifact@v4
@@ -261,6 +279,15 @@ jobs:
         if: env.TESTRAIL_ENABLED == 'true'
         run: test -f reports-cypress/junit/results.xml
 
+      - name: Validate Cypress JUnit XML
+        if: env.TESTRAIL_ENABLED == 'true'
+        run: |
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          ET.parse("reports-cypress/junit/results.xml")
+          print("Cypress XML OK")
+          PY
+
       - name: Setup Python
         if: env.TESTRAIL_ENABLED == 'true'
         uses: actions/setup-python@v5
@@ -269,7 +296,7 @@ jobs:
 
       - name: Install trcli
         if: env.TESTRAIL_ENABLED == 'true'
-        run: pip install trcli
+        run: python -m pip install --upgrade pip trcli
 
       - name: Upload Cypress report to TestRail
         if: env.TESTRAIL_ENABLED == 'true'
@@ -284,6 +311,7 @@ jobs:
             --username "$TESTRAIL_USER" \
             --password "$TESTRAIL_API_KEY" \
             parse_junit \
+            --case-matcher "name" \
             --title "Cypress | PR #${{ github.event.pull_request.number }} | Run #${{ github.run_number }}" \
             -f "reports-cypress/junit/results.xml"
 
@@ -294,6 +322,10 @@ jobs:
     env:
       TESTRAIL_ENABLED: ${{ secrets.TESTRAIL_ENABLED || 'false' }}
     steps:
+      - name: Checkout
+        if: env.TESTRAIL_ENABLED == 'true'
+        uses: actions/checkout@v4
+
       - name: Download Playwright reports
         if: env.TESTRAIL_ENABLED == 'true'
         uses: actions/download-artifact@v4
@@ -305,6 +337,15 @@ jobs:
         if: env.TESTRAIL_ENABLED == 'true'
         run: test -f reports-playwright/junit/results.xml
 
+      - name: Validate Playwright JUnit XML
+        if: env.TESTRAIL_ENABLED == 'true'
+        run: |
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          ET.parse("reports-playwright/junit/results.xml")
+          print("Playwright XML OK")
+          PY
+
       - name: Setup Python
         if: env.TESTRAIL_ENABLED == 'true'
         uses: actions/setup-python@v5
@@ -313,7 +354,7 @@ jobs:
 
       - name: Install trcli
         if: env.TESTRAIL_ENABLED == 'true'
-        run: pip install trcli
+        run: python -m pip install --upgrade pip trcli
 
       - name: Upload Playwright report to TestRail
         if: env.TESTRAIL_ENABLED == 'true'
@@ -328,12 +369,22 @@ jobs:
             --username "$TESTRAIL_USER" \
             --password "$TESTRAIL_API_KEY" \
             parse_junit \
+            --case-matcher "name" \
             --title "Playwright | PR #${{ github.event.pull_request.number }} | Run #${{ github.run_number }}" \
             -f "reports-playwright/junit/results.xml"
 
   ci-summary:
     runs-on: ubuntu-latest
-    needs: [lint, tests-selenium, tests-cypress, tests-playwright, testrail-selenium, testrail-cypress, testrail-playwright]
+    needs:
+      [
+        lint,
+        tests-selenium,
+        tests-cypress,
+        tests-playwright,
+        testrail-selenium,
+        testrail-cypress,
+        testrail-playwright
+      ]
     if: always()
     steps:
       - name: Evaluate
@@ -348,20 +399,24 @@ jobs:
         run: |
           set -euo pipefail
           fail=0
+
           if [[ "$LINT_RESULT" != "success" ]]; then
             echo "lint failed"
             fail=1
           fi
+
           for result in "$SELENIUM_RESULT" "$CYPRESS_RESULT" "$PLAYWRIGHT_RESULT"; do
             if [[ "$result" != "success" && "$result" != "skipped" ]]; then
               echo "tests failed"
               fail=1
             fi
           done
+
           for result in "$TESTRAIL_SELENIUM_RESULT" "$TESTRAIL_CYPRESS_RESULT" "$TESTRAIL_PLAYWRIGHT_RESULT"; do
             if [[ "$result" != "success" && "$result" != "skipped" ]]; then
               echo "testrail upload failed"
               fail=1
             fi
           done
+
           exit $fail
