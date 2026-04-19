@@ -3,7 +3,8 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
-    "test": "node scripts/wait-for-url.js && playwright test"
+    "test": "node scripts/wait-for-url.js && playwright test",
+    "test:status-checks": "node scripts/wait-for-url.js && PLAYWRIGHT_STATUS_CHECKS=true playwright test tests/status-*.spec.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.59.1"
