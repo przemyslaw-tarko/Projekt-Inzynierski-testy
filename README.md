@@ -32,13 +32,28 @@ reports/playwright/
 - Git
 - Docker + Docker Compose v2
 - Node.js >= 20.19.0 (zalecane 22+)
-- npm 11.x
+- npm >= 10.x
 
 ## Pobranie repozytorium + submodule
 AUT jest budowany z submodule `apps/test-bookstore`. Po klonowaniu repo należy wykonać:
 ```bash
 git submodule update --init --recursive
 ```
+
+## Zmienne środowiskowe
+Plik `.env.example` zawiera domyślne wartości. Skopiuj go przed pierwszym uruchomieniem:
+```bash
+cp .env.example .env
+```
+
+Dostępne zmienne:
+- `APP_PORT` - port lokalny AUT (domyślnie `8080`)
+- `TESTRAIL_ENABLED` - włącza wysyłanie wyników do TestRail (domyślnie `false`)
+- `TESTRAIL_URL` - adres instancji TestRail, np. `https://projekt.testrail.io`
+- `TESTRAIL_USER` - adres e-mail konta TestRail
+- `TESTRAIL_API_KEY` - klucz API wygenerowany w ustawieniach konta TestRail
+- `VERBOSE_LOGS` - włącza szczegółowe logi oczekiwania na aplikację i Docker Compose (domyślnie `false`)
+
 
 ## Uruchomienie AUT
 Pierwsze uruchomienie zbuduje obrazy Dockera z katalogu `apps/test-bookstore`.
@@ -68,33 +83,50 @@ npm run test:cypress
 npm run test:playwright
 ```
 
+Uruchomienie testów dla wszystkich frameworków sekwencyjnie:
+```bash
+npm run test:all
+```
+
 Jeśli wprowadzisz zmiany w testach uruchamianych w kontenerach (Selenium/Cypress/Playwright), przebuduj obrazy testowe:
 ```bash
 npm run compose:tests:build
 ```
 
 ## Scenariusze testowe
-Dla każdego frameworka został przygotowany zestaw testow mający na celu porównać te same akcje.
-Scenariusze dostępne w pliku `docs/test-case.md`.
+Dla każdego frameworka został przygotowany identyczny zestaw testów obejmujący:
+- testy smoke - minimalna weryfikacja dostępności aplikacji,
+- testy UI - główne przepływy użytkownika w interfejsie sklepu,
+- testy API - publiczne endpointy WooCommerce Store REST API.
+
+Pełna specyfikacja scenariuszy dostępna w pliku `docs/test-case.md`.
 
 ## Raporty
-- `reports/selenium/html`
-- `reports/selenium/junit`
-- `reports/cypress/junit`
-- `reports/playwright/html`
-- `reports/playwright/junit`
+Po wykonaniu testów wyniki dostępne są w katalogu `reports/`:
+- `reports/selenium/html` - raport HTML (Mochawesome)
+- `reports/selenium/junit` - wyniki w formacie JUnit XML
+- `reports/cypress/junit` - wyniki w formacie JUnit XML
+- `reports/playwright/html` - interaktywny raport HTML
+- `reports/playwright/junit` - wyniki w formacie JUnit XML
 
+## Integracja z TestRail
+Wyniki testów mogą być automatycznie przesyłane do TestRail po każdym uruchomieniu.
 
-## Logi
-Domyślnie logi z oczekiwania na aplikacje i z Docker Compose są wyciszone.
-Aby właczyć pełne logi:
-```bash
-VERBOSE_LOGS=true
-```
+Aby włączyć integrację lokalnie, ustaw w pliku `.env`:
+
+TESTRAIL_ENABLED=true
+TESTRAIL_URL=https://twoja-instancja.testrail.io
+TESTRAIL_USER=adres@email.com
+TESTRAIL_API_KEY=twoj_klucz_api
+
+W środowisku CI integracja jest kontrolowana przez sekrety repozytorium GitHub:
+`TESTRAIL_ENABLED`, `TESTRAIL_URL`, `TESTRAIL_USER`, `TESTRAIL_API_KEY`.
+
+Gdy `TESTRAIL_ENABLED=false` (wartość domyślna), wszystkie kroki związane z TestRail są pomijane - pipeline CI działa bez skonfigurowanego konta TestRail.
 
 ## Przepływ integracji CI/CD
-1. `auto-pr.yml` - tworzy PR dla każdego branch oprócz `main`.
-2. `ci.yml` - lint + testy tylko tych frameworkow, których kod się zmienił (tylko na PR).
+1. `auto-pr.yml` - tworzy PR dla każdego brancha oprócz `main`.
+2. `ci.yml` - lint + testy tylko tych frameworków, których kod się zmienił (tylko na PR).
 3. `auto-merge.yml` - włącza auto-merge po poprawnym CI.
 
 CD publikuje obrazy testowe do GHCR dopiero po pomyślnym CI na branchu `main`.
