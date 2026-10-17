@@ -1,8 +1,46 @@
-# Projekt-Inżynierski-testy
-## Porównanie frameworkow Selenium / Cypress / Playwright
+# Selenium vs Cypress vs Playwright – porównanie frameworków automatyzacji testów
 
-Projekt realizowany w ramach pracy inżynierskiej - środowisko badawcze do porównania frameworkow E2E w architekturze kontenerowej oraz prostej integracji CI/CD.
+![CD](https://github.com/przemyslaw-tarko/Projekt-Inzynierski-testy/actions/workflows/cd.yml/badge.svg)
+![Playwright](https://img.shields.io/badge/Playwright-1.59-2EAD33?logo=playwright)
+![Cypress](https://img.shields.io/badge/Cypress-15.11-17202C?logo=cypress)
+![Selenium](https://img.shields.io/badge/Selenium-4.x-43B02A?logo=selenium)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)
 
+Projekt zrealizowany w ramach pracy inżynierskiej na ZUT w Szczecinie (2026):
+„Porównanie frameworków Selenium, Cypress i Playwright w automatyzacji testów aplikacji Bookstore w środowisku kontenerowym Docker”.
+
+Obiektem testów jest aplikacja szkoleniowa [Testelka – test-bookstore](https://github.com/Testelka/test-bookstore)
+(sklep WordPress + WooCommerce z celowo ukrytymi błędami), dołączona jako submoduł Git.
+
+## Najważniejsze elementy
+
+- 20 identycznych scenariuszy w każdym frameworku: smoke, 12 × UI, 7 × REST API
+- Izolowane środowisko testowe w Docker Compose (healthchecki, oczekiwanie na gotowość serwisów)
+- CI w GitHub Actions: lint, walidacja docker-compose, uruchamianie tylko zmienionego frameworka (paths-filter)
+- CD: publikacja obrazów testowych do GitHub Container Registry
+- Raporty HTML + JUnit XML, automatyczne przesyłanie wyników do TestRail (trcli)
+
+## Wyniki
+
+| Kryterium | Selenium | Cypress | Playwright |
+|---|---|---|---|
+| Średni czas – lokalnie (5 uruchomień) | 66,4 s | 42,2 s | **25,2 s** |
+| Odchylenie standardowe | 31,0 s | 6,4 s | **3,5 s** |
+| Średni czas jobu – CI (3 uruchomienia) | 139,3 s | 165,3 s | **127,0 s** |
+| Złożoność konfiguracji | wysoka | średnia | **niska** |
+| Raportowanie | zewnętrzne biblioteki | tylko JUnit (scalanie) | **wbudowane HTML + JUnit** |
+
+**Wniosek:** Playwright był najszybszy i najstabilniejszy oraz wymagał najmniej konfiguracji.
+Cypress – intuicyjne API, ale największa zmienność w CI. Selenium – najwięcej kodu pomocniczego
+i najwyższa zmienność czasów (architektura WebDriver przez HTTP).
+
+## Zrzuty ekranu
+
+| Raport Playwright | Pipeline CI |
+|---|---|
+| ![Raport Playwright](docs/img/playwright-report.png) | ![Pipeline CI](docs/img/ci-pipeline.png) |
+
+![Wyniki w TestRail](docs/img/testrail-runs.png)
 ## Cel i zakres
 - Porównanie łatwości konfiguracji i uruchomienia frameworkow E2E (Selenium, Cypress, Playwright).
 - Identyczne scenariusze testowe dla każdego frameworka.
